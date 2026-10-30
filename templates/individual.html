@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Predicción individual · DenguePredict{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <span class="eyebrow">Opción 1</span>
+  <h1>Predicción individual</h1>
+  <p>Ingresa los cinco indicadores seleccionados por el estudio y compara ambos modelos.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <form method="post" class="card shadow-sm">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label">Duración de fiebre (días)</label><input class="form-control" type="number" step="1" min="0" name="DURATION OF FEVER" required value="{{ form_values.get('DURATION OF FEVER', '') }}"></div>
+          <div class="col-md-6"><label class="form-label">PCV (%)</label><input class="form-control" type="number" step="0.1" min="0" name="PCV" required value="{{ form_values.get('PCV', '') }}"></div>
+          <div class="col-md-6"><label class="form-label">Plaquetas (células/mm³)</label><input class="form-control" type="number" step="1" min="0" name="PLATELET COUNT" required value="{{ form_values.get('PLATELET COUNT', '') }}"></div>
+          <div class="col-md-6"><label class="form-label">WBC máximo (células/mm³)</label><input class="form-control" type="number" step="1" min="0" name="HIGHEST WBC" required value="{{ form_values.get('HIGHEST WBC', '') }}"></div>
+          <div class="col-md-6"><label class="form-label">ALT (U/L)</label><input class="form-control" type="number" step="0.1" min="0" name="ALT" required value="{{ form_values.get('ALT', '') }}"></div>
+          <div class="col-md-6"><label class="form-label">¿Presenta hipotensión al ingreso?</label><select class="form-select" name="BP AT ADMISSION" required><option value="1" {% if form_values.get('BP AT ADMISSION') == '1' %}selected{% endif %}>Sí</option><option value="2" {% if form_values.get('BP AT ADMISSION', '2') == '2' %}selected{% endif %}>No</option></select></div>
+          <div class="col-md-6"><label class="form-label">Modelo</label><select class="form-select" name="model"><option value="both">Comparar ambos</option><option value="logistic">Regresión Logística</option><option value="neural">Red Neuronal Artificial</option></select></div>
+        </div>
+        <button class="btn btn-primary mt-4" type="submit">Generar predicción</button>
+      </div>
+    </form>
+  </div>
+  <div class="col-lg-5">
+    <div class="info-card"><h2 class="h5">Interpretación</h2><p>La clase positiva es <strong>dengue complicado</strong>. La probabilidad mostrada corresponde al riesgo estimado por cada modelo.</p><p class="mb-0">Los resultados son académicos y no constituyen diagnóstico médico.</p></div>
+  </div>
+</div>
+
+{% if results %}
+<h2 class="h4 mt-5 mb-3">Resultados</h2>
+<div class="row g-4">
+  {% for item in results %}
+  <div class="col-md-6"><div class="result-card {% if item.positive %}danger{% else %}safe{% endif %}"><span>{{ item.label }}</span><h3>{{ item.prediction }}</h3><p class="mb-0">Probabilidad de complicación: <strong>{{ item.probability|percent }}</strong></p></div></div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

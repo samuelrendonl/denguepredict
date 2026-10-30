@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Inicio · DenguePredict{% endblock %}
+{% block content %}
+<section class="hero p-4 p-md-5 mb-4">
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <span class="eyebrow">Proyecto final · Analítica de datos</span>
+      <h1 class="display-5 fw-bold mt-2">Predicción de complicaciones en dengue pediátrico</h1>
+      <p class="lead mb-0">Compara Regresión Logística y una Red Neuronal Artificial para estimar el riesgo de dengue complicado.</p>
+    </div>
+    <div class="col-lg-4 mt-4 mt-lg-0 text-lg-end">
+      <a class="btn btn-light btn-lg me-2" href="{{ url_for('individual') }}">Probar paciente</a>
+      <a class="btn btn-outline-light btn-lg" href="{{ url_for('batch') }}">Cargar lote</a>
+    </div>
+  </div>
+</section>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="stat-card"><span>Pacientes</span><strong>{{ dataset_rows }}</strong></div></div>
+  <div class="col-md-4"><div class="stat-card"><span>No complicados</span><strong>{{ uncomplicated }}</strong></div></div>
+  <div class="col-md-4"><div class="stat-card"><span>Complicados</span><strong>{{ complicated }}</strong></div></div>
+</div>
+
+<div class="row g-4">
+  {% for name, metric in metrics.items() %}
+  <div class="col-lg-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h2 class="h4">{{ model_labels[name] }}</h2>
+        <p class="text-muted">Evaluación sobre {{ test_rows }} pacientes reservados como prueba; entrenamiento: {{ train_rows }}.</p>
+        <div class="row g-2">
+          <div class="col-6 metric"><span>Accuracy</span><b>{{ metric.accuracy_display }}</b></div>
+          <div class="col-6 metric"><span>Precision</span><b>{{ metric.precision_display }}</b></div>
+          <div class="col-6 metric"><span>Sensibilidad</span><b>{{ metric.recall_display }}</b></div>
+          <div class="col-6 metric"><span>Especificidad</span><b>{{ metric.specificity_display }}</b></div>
+          <div class="col-6 metric"><span>F1-score</span><b>{{ metric.f1_display }}</b></div>
+          <div class="col-6 metric"><span>ROC-AUC</span><b>{{ metric.roc_auc_display }}</b></div>
+        </div>
+        <h3 class="h6 mt-4">Matriz de confusión</h3>
+        <table class="table table-sm matrix mb-0">
+          <thead><tr><th></th><th>Pred. no comp.</th><th>Pred. comp.</th></tr></thead>
+          <tbody>
+            <tr><th>Real no comp.</th><td>{{ metric.confusion_matrix[0][0] }}</td><td>{{ metric.confusion_matrix[0][1] }}</td></tr>
+            <tr><th>Real comp.</th><td>{{ metric.confusion_matrix[1][0] }}</td><td>{{ metric.confusion_matrix[1][1] }}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card shadow-sm mt-4">
+  <div class="card-body">
+    <h2 class="h5">Variables utilizadas</h2>
+    <div class="row">
+      {% for name, label in feature_labels.items() %}<div class="col-md-6 col-lg-4 mb-2"><span class="feature-pill">{{ label }}</span></div>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

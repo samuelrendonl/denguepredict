@@ -1,0 +1,15 @@
+# Entornos virtuales locales
+.venv/
+venve/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Archivos temporales
+*.log
+*.tmp
