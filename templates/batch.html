@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Predicción por lote · DenguePredict{% endblock %}
 {% block content %}
-<div class="page-heading"><span class="eyebrow">Opción 2</span><h1>Predicción por lote</h1><p>Sube un archivo CSV o Excel con las cinco variables del modelo. Para obtener métricas, incluye también la columna objetivo.</p></div>
+<div class="page-heading"><span class="eyebrow">Opción 2</span><h1>Predicción por lote</h1><p>Sube un archivo CSV o Excel con las 24 variables de entrada del dataset. Para obtener métricas, incluye también la columna objetivo.</p></div>
 
-<div class="card shadow-sm mb-4"><div class="card-body"><form method="post" enctype="multipart/form-data" class="row g-3 align-items-end"><div class="col-md-8"><label class="form-label">Archivo de pacientes</label><input class="form-control" type="file" name="file" accept=".csv,.xlsx,.xls" required></div><div class="col-md-4"><button class="btn btn-primary w-100" type="submit">Procesar lote</button></div></form><p class="small text-muted mt-3 mb-0">Columnas obligatorias: <code>DURATION OF FEVER</code>, <code>PCV</code>, <code>PLATELET COUNT</code>, <code>HIGHEST WBC</code>, <code>ALT</code> y <code>BP AT ADMISSION</code>. La variable objetivo usa 1 = no complicado y 2 = complicado.</p></div></div>
+<div class="card shadow-sm mb-4"><div class="card-body"><form method="post" enctype="multipart/form-data" class="row g-3 align-items-end"><div class="col-md-8"><label class="form-label">Archivo de pacientes</label><input class="form-control" type="file" name="file" accept=".csv,.xlsx,.xls" required></div><div class="col-md-4"><button class="btn btn-primary w-100" type="submit">Procesar lote</button></div></form><p class="small text-muted mt-3 mb-0">El archivo debe contener todas las columnas de entrada mostradas en la predicción individual. La variable objetivo es opcional y usa 1 = no complicado y 2 = complicado.</p></div></div>
 
 {% if result %}
 <div class="alert alert-success">Se procesaron <strong>{{ result.rows }}</strong> filas. <a href="{{ url_for('download', token=result.download_token) }}" class="alert-link">Descargar resultados</a></div>

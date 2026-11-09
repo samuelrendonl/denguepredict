@@ -9,7 +9,9 @@ import pandas as pd
 from flask import Flask, flash, redirect, render_template, request, send_file, url_for
 
 from src.modeling import (
+    BINARY_INPUT_COLUMNS,
     FEATURE_LABELS,
+    INPUT_OPTIONS,
     INPUT_FEATURE_COLUMNS,
     MODEL_LABELS,
     TARGET_COLUMN,
@@ -64,6 +66,8 @@ def percent_filter(value):
 @app.context_processor
 def inject_globals():
     return {
+        "binary_input_columns": BINARY_INPUT_COLUMNS,
+        "input_options": INPUT_OPTIONS,
         "model_labels": MODEL_LABELS,
         "feature_labels": FEATURE_LABELS,
         "target_column": TARGET_COLUMN,
@@ -94,13 +98,22 @@ def individual():
         try:
             form_values = request.form.to_dict()
             model_name = request.form.get("model", "both")
+            missing = [
+                column for column in INPUT_FEATURE_COLUMNS
+                if not request.form.get(column, "").strip()
+            ]
+            if missing:
+                raise ValueError(
+                    "Completa todas las variables requeridas: " + ", ".join(missing)
+                )
+
             row = {
-                "DURATION OF FEVER": float(request.form["DURATION OF FEVER"]),
-                "PCV": float(request.form["PCV"]),
-                "PLATELET COUNT": float(request.form["PLATELET COUNT"]),
-                "HIGHEST WBC": float(request.form["HIGHEST WBC"]),
-                "ALT": float(request.form["ALT"]),
-                "BP AT ADMISSION": int(request.form["BP AT ADMISSION"]),
+                column: (
+                    int(float(request.form[column]))
+                    if column in BINARY_INPUT_COLUMNS
+                    else float(request.form[column])
+                )
+                for column in INPUT_FEATURE_COLUMNS
             }
             patient = pd.DataFrame([row], columns=INPUT_FEATURE_COLUMNS)
             bundle = app.config["BUNDLE"]

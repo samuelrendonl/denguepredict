@@ -12,18 +12,36 @@ La aplicación utiliza `MASTER_CHART_F1000Research.xlsx`. La variable objetivo e
 - `1`: dengue no complicado.
 - `2`: dengue complicado.
 
-El modelo utiliza las variables base seleccionadas en el artículo y variables derivadas de limpieza:
+El modelo utiliza todas las variables de entrada disponibles en el dataset y variables derivadas de limpieza:
 
+- `AGE`.
+- `GENDER`.
 - `DURATION OF FEVER`.
+- `HEADACHE`.
+- `MYALGIA`.
+- `ABDOMINAL PAIN`.
+- `RASH`.
+- `VOMITING`.
+- `BREATHLESSNESS`.
+- `BLEEDING`.
+- `ORGANOMEGALY`.
+- `HB`.
 - `PCV`.
+- `LOWEST WBC`.
 - `PLATELET COUNT`.
 - `HIGHEST WBC`.
 - `ALT`.
-- `BP AT ADMISSION` (1 = hipotensión, 2 = no hipotensión).
+- `CREATININE`.
+- `FERRITIN`.
+- `IV FLUIDS`.
+- `ANTIBIOTICS`.
+- `ANTIPYRETICS`.
+- `STEROIDS`.
+- `BP AT ADMISSION` (2 = hipotensión, 1 = no hipotensión).
 
-También se crean `PCV_HIGH`, `PLATELETS_LOW`, `WBC_HIGH`, `ALT_ELEVATED`, `HYPOTENSION`, `FEVER_LONG`, `THROMBOCYTOPENIA_SEVERE` y `PLATELET_PCV_RATIO`.
+También se crean `PCV_HIGH`, `PLATELETS_LOW`, `WBC_HIGH`, `ALT_ELEVATED`, `HYPOTENSION`, `FEVER_LONG`, `THROMBOCYTOPENIA_SEVERE` y `PLATELET_PCV_RATIO`. La variable objetivo no se solicita al predecir: es el resultado que calcula el modelo.
 
-Los notebooks documentan la eliminación de columnas constantes, la conversión de códigos 1/2 a indicadores numéricos y la creación de variables nuevas. Los valores faltantes se completan con la mediana dentro del pipeline de cada modelo. `FERRITIN` no se utiliza porque tiene una proporción importante de datos faltantes y no fue incluida en la regresión multivariable del artículo. Las variables de tratamiento tampoco se usan, ya que pueden representar información posterior al ingreso.
+Los notebooks documentan la conversión de códigos 1/2 a valores numéricos y la creación de variables nuevas. Los valores faltantes se completan con la mediana dentro del pipeline de cada modelo.
 
 ## Instalación y ejecución
 
@@ -74,7 +92,7 @@ Permite introducir los datos de un paciente y obtener la clase predicha y la pro
 
 ### Predicción por lote
 
-Permite cargar CSV, XLSX o XLS. El archivo debe incluir las seis variables base del modelo; las variables derivadas se crean automáticamente. Si además incluye `GROUPS: DENGUE FEVER OR COMPLICATED DENGUE`, se calculan accuracy, precision, sensibilidad, especificidad, F1-score, ROC-AUC y matriz de confusión. También se puede descargar el resultado en Excel.
+Permite cargar CSV, XLSX o XLS. El archivo debe incluir las 24 variables de entrada del dataset; las variables derivadas se crean automáticamente. Si además incluye `GROUPS: DENGUE FEVER OR COMPLICATED DENGUE`, se calculan accuracy, precision, sensibilidad, especificidad, F1-score, ROC-AUC y matriz de confusión. También se puede descargar el resultado en Excel.
 
 En `ejemplos/` se incluyen `pacientes_ejemplo.csv` para probar predicciones y `pacientes_ejemplo_con_etiquetas.csv` para probar también las métricas.
 

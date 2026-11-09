@@ -27,23 +27,73 @@ import joblib
 
 TARGET_COLUMN = "GROUPS: DENGUE FEVER OR COMPLICATED DENGUE"
 INPUT_FEATURE_COLUMNS = [
+    "AGE",
+    "GENDER",
     "DURATION OF FEVER",
+    "HEADACHE",
+    "MYALGIA",
+    "ABDOMINAL PAIN",
+    "RASH",
+    "VOMITING",
+    "BREATHLESSNESS",
+    "BLEEDING",
+    "BP AT ADMISSION",
+    "ORGANOMEGALY",
+    "HB",
     "PCV",
+    "LOWEST WBC",
     "PLATELET COUNT",
     "HIGHEST WBC",
     "ALT",
-    "BP AT ADMISSION",
+    "CREATININE",
+    "FERRITIN",
+    "IV FLUIDS",
+    "ANTIBIOTICS",
+    "ANTIPYRETICS",
+    "STEROIDS",
 ]
+
+BINARY_INPUT_COLUMNS = [
+    "AGE",
+    "GENDER",
+    "HEADACHE",
+    "MYALGIA",
+    "ABDOMINAL PAIN",
+    "RASH",
+    "VOMITING",
+    "BREATHLESSNESS",
+    "BLEEDING",
+    "BP AT ADMISSION",
+    "ORGANOMEGALY",
+    "IV FLUIDS",
+    "ANTIBIOTICS",
+    "ANTIPYRETICS",
+    "STEROIDS",
+]
+
+INPUT_OPTIONS = {
+    "AGE": [("1", "6 años o menos"), ("2", "Más de 6 años")],
+    "GENDER": [("1", "Masculino"), ("2", "Femenino")],
+    "HEADACHE": [("1", "Sí"), ("2", "No")],
+    "MYALGIA": [("1", "Sí"), ("2", "No")],
+    "ABDOMINAL PAIN": [("1", "Sí"), ("2", "No")],
+    "RASH": [("1", "Sí"), ("2", "No")],
+    "VOMITING": [("1", "Sí"), ("2", "No")],
+    "BREATHLESSNESS": [("1", "Sí"), ("2", "No")],
+    "BLEEDING": [("1", "Sí"), ("2", "No")],
+    "BP AT ADMISSION": [("2", "Sí, presenta hipotensión"), ("1", "No presenta hipotensión")],
+    "ORGANOMEGALY": [("1", "Sí"), ("2", "No")],
+    "IV FLUIDS": [("1", "Sí"), ("2", "No")],
+    "ANTIBIOTICS": [("1", "Sí"), ("2", "No")],
+    "ANTIPYRETICS": [("1", "Sí"), ("2", "No")],
+    "STEROIDS": [("1", "Sí"), ("2", "No")],
+}
 
 # Alias de compatibilidad: son las columnas que el usuario entrega a la aplicación.
 FEATURE_COLUMNS = INPUT_FEATURE_COLUMNS
 
 MODEL_FEATURE_COLUMNS = [
-    "DURATION OF FEVER",
-    "PCV",
-    "PLATELET COUNT",
-    "HIGHEST WBC",
-    "ALT",
+    *INPUT_FEATURE_COLUMNS,
     "PCV_HIGH",
     "PLATELETS_LOW",
     "WBC_HIGH",
@@ -55,12 +105,30 @@ MODEL_FEATURE_COLUMNS = [
 ]
 
 FEATURE_LABELS = {
+    "AGE": "Edad",
+    "GENDER": "Género",
     "DURATION OF FEVER": "Duración de fiebre (días)",
+    "HEADACHE": "Dolor de cabeza",
+    "MYALGIA": "Mialgia",
+    "ABDOMINAL PAIN": "Dolor abdominal",
+    "RASH": "Erupción cutánea",
+    "VOMITING": "Vómito",
+    "BREATHLESSNESS": "Dificultad respiratoria",
+    "BLEEDING": "Sangrado",
+    "BP AT ADMISSION": "¿Presenta hipotensión al ingreso?",
+    "ORGANOMEGALY": "Organomegalia",
+    "HB": "Hemoglobina (g/dL)",
     "PCV": "PCV (%)",
+    "LOWEST WBC": "WBC mínimo (células/mm³)",
     "PLATELET COUNT": "Plaquetas (células/mm³)",
     "HIGHEST WBC": "WBC máximo (células/mm³)",
     "ALT": "ALT (U/L)",
-    "BP AT ADMISSION": "Hipotensión al ingreso",
+    "CREATININE": "Creatinina (mg/dL)",
+    "FERRITIN": "Ferritina",
+    "IV FLUIDS": "¿Recibe líquidos intravenosos?",
+    "ANTIBIOTICS": "¿Recibe antibióticos?",
+    "ANTIPYRETICS": "¿Recibe antipiréticos?",
+    "STEROIDS": "¿Recibe esteroides?",
 }
 
 MODEL_LABELS = {
@@ -109,16 +177,19 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     for column in INPUT_FEATURE_COLUMNS:
         raw[column] = pd.to_numeric(raw[column], errors="coerce")
 
-    features = raw[["DURATION OF FEVER", "PCV", "PLATELET COUNT", "HIGHEST WBC", "ALT"]].copy()
+    # Se conservan todas las variables originales del dataset. Las variables
+    # derivadas se agregan además para mantener las transformaciones usadas
+    # por el modelo.
+    features = raw[INPUT_FEATURE_COLUMNS].copy()
     features["PCV_HIGH"] = _threshold_feature(raw["PCV"], 42, ">=")
     features["PLATELETS_LOW"] = _threshold_feature(raw["PLATELET COUNT"], 75000, "<=")
     features["WBC_HIGH"] = _threshold_feature(raw["HIGHEST WBC"], 7000, ">=")
     features["ALT_ELEVATED"] = _threshold_feature(raw["ALT"], 70, ">=")
 
-    # En el README original: BP AT ADMISSION = 1 sí tiene hipotensión, 2 no.
+    # En el dataset: BP AT ADMISSION = 2 sí tiene hipotensión, 1 no.
     bp = raw["BP AT ADMISSION"]
     features["HYPOTENSION"] = pd.Series(
-        np.where(bp.isna(), np.nan, (bp == 1).astype(float)), index=raw.index
+        np.where(bp.isna(), np.nan, (bp == 2).astype(float)), index=raw.index
     )
     features["FEVER_LONG"] = _threshold_feature(raw["DURATION OF FEVER"], 6, ">=")
     features["THROMBOCYTOPENIA_SEVERE"] = _threshold_feature(

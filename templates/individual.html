@@ -4,20 +4,30 @@
 <div class="page-heading">
   <span class="eyebrow">Opción 1</span>
   <h1>Predicción individual</h1>
-  <p>Ingresa los cinco indicadores seleccionados por el estudio y compara ambos modelos.</p>
+  <p>Ingresa las 24 variables del paciente disponibles en el dataset y compara ambos modelos.</p>
 </div>
 
 <div class="row g-4">
   <div class="col-lg-7">
     <form method="post" class="card shadow-sm">
       <div class="card-body">
+        <p class="small text-muted">Completa todos los campos. Las opciones están expresadas de forma clara y el sistema aplica internamente la codificación del dataset. Las variables derivadas se calculan automáticamente.</p>
         <div class="row g-3">
-          <div class="col-md-6"><label class="form-label">Duración de fiebre (días)</label><input class="form-control" type="number" step="1" min="0" name="DURATION OF FEVER" required value="{{ form_values.get('DURATION OF FEVER', '') }}"></div>
-          <div class="col-md-6"><label class="form-label">PCV (%)</label><input class="form-control" type="number" step="0.1" min="0" name="PCV" required value="{{ form_values.get('PCV', '') }}"></div>
-          <div class="col-md-6"><label class="form-label">Plaquetas (células/mm³)</label><input class="form-control" type="number" step="1" min="0" name="PLATELET COUNT" required value="{{ form_values.get('PLATELET COUNT', '') }}"></div>
-          <div class="col-md-6"><label class="form-label">WBC máximo (células/mm³)</label><input class="form-control" type="number" step="1" min="0" name="HIGHEST WBC" required value="{{ form_values.get('HIGHEST WBC', '') }}"></div>
-          <div class="col-md-6"><label class="form-label">ALT (U/L)</label><input class="form-control" type="number" step="0.1" min="0" name="ALT" required value="{{ form_values.get('ALT', '') }}"></div>
-          <div class="col-md-6"><label class="form-label">¿Presenta hipotensión al ingreso?</label><select class="form-select" name="BP AT ADMISSION" required><option value="1" {% if form_values.get('BP AT ADMISSION') == '1' %}selected{% endif %}>Sí</option><option value="2" {% if form_values.get('BP AT ADMISSION', '2') == '2' %}selected{% endif %}>No</option></select></div>
+          {% for column, label in feature_labels.items() %}
+          <div class="col-md-6">
+            <label class="form-label" for="field-{{ loop.index }}">{{ label }}</label>
+            {% if column in binary_input_columns %}
+            <select class="form-select" id="field-{{ loop.index }}" name="{{ column }}" required>
+              <option value="" {% if not form_values.get(column) %}selected{% endif %}>Selecciona una opción</option>
+              {% for value, option_label in input_options[column] %}
+              <option value="{{ value }}" {% if form_values.get(column) == value %}selected{% endif %}>{{ option_label }}</option>
+              {% endfor %}
+            </select>
+            {% else %}
+            <input class="form-control" id="field-{{ loop.index }}" type="number" step="any" min="0" name="{{ column }}" required value="{{ form_values.get(column, '') }}">
+            {% endif %}
+          </div>
+          {% endfor %}
           <div class="col-md-6"><label class="form-label">Modelo</label><select class="form-select" name="model"><option value="both">Comparar ambos</option><option value="logistic">Regresión Logística</option><option value="neural">Red Neuronal Artificial</option></select></div>
         </div>
         <button class="btn btn-primary mt-4" type="submit">Generar predicción</button>
